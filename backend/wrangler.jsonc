@@ -1,0 +1,48 @@
+{
+  "name": "nexusrank-ai",
+  "main": "worker.js",
+  "compatibility_date": "2025-08-25",
+  "workers_dev": true,
+  "build": {
+    "command": ""
+  },
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "env": {
+    "production": {
+      "name": "nexusrank-ai",
+      "routes": [
+        {
+          "pattern": "nexusrank-ai.your-account.workers.dev/*",
+          "zone_name": "your-domain.com"
+        }
+      ]
+    },
+    "staging": {
+      "name": "nexusrank-ai-staging",
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "your-kv-namespace-id",
+      "preview_id": "your-preview-kv-namespace-id"
+    }
+  ],
+  "secrets": [
+    "DEEPSEEK_API_KEY"
+  ],
+  "limits": {
+    "cpu_ms": 50000
+  },
+  "placement": {
+    "mode": "smart"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
