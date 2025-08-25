@@ -1,8 +1,15 @@
+/**
+ * NexusRank Pro - FINAL Fixed Cloudflare Worker
+ * Resolves spaces, CORS, and API key issues
+ */
+
+// ✅ Allowed origins (NO TRAILING SPACES!)
 const ALLOWED_ORIGINS = [
   'https://nexusrankpro.pages.dev',
   'http://localhost:5000'
 ];
 
+// ✅ CORS headers
 function getCorsHeaders(request) {
   const origin = request.headers.get('Origin');
   const headers = {
@@ -10,21 +17,26 @@ function getCorsHeaders(request) {
     'Access-Control-Max-Age': '86400',
     'Content-Type': 'application/json'
   };
+
   if (origin && ALLOWED_ORIGINS.includes(origin)) {
     headers['Access-Control-Allow-Origin'] = origin;
     headers['Vary'] = 'Origin';
   }
+
   return headers;
 }
 
+// ✅ Handle preflight (OPTIONS)
 function handleOptions(request) {
   const corsHeaders = getCorsHeaders(request);
-  corsHeaders['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+  corsHeaders['Access-Control-Allow-Headers'] = 'Content-Type';
   return new Response(null, { status: 204, headers: corsHeaders });
 }
 
+// ✅ DeepSeek API URL (NO TRAILING SPACE!)
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
+// ✅ Tool configurations
 const TOOL_CONFIGS = {
   '/ai/improve': {
     system: 'Enhance this text for clarity, fluency, and professionalism. Improve readability and engagement — without changing the core message.',
@@ -60,25 +72,32 @@ const TOOL_CONFIGS = {
 
 export default {
   async fetch(request, env) {
+    // ✅ Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return handleOptions(request);
     }
+
+    // ✅ Validate POST
     if (request.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
         headers: getCorsHeaders(request)
       });
     }
+
     const url = new URL(request.url);
     const path = url.pathname;
-    console.log('🔍 Incoming request to:', new URL(request.url).pathname);
-console.log('🔑 API Key exists:', !!env.DEEPSEEK_API_KEY);
-if (env.DEEPSEEK_API_KEY) {
-  console.log('🔑 First 4 chars:', env.DEEPSEEK_API_KEY.substring(0, 4));
-} else {
-  console.log('❌ API Key is MISSING!');
-}
 
+    // ✅ Debug logs
+    console.log('🔍 Incoming request to:', path);
+    console.log('🔑 API Key exists:', !!env.DEEPSEEK_API_KEY);
+    if (env.DEEPSEEK_API_KEY) {
+      console.log('🔑 First 4 chars:', env.DEEPSEEK_API_KEY.substring(0, 4));
+    } else {
+      console.log('❌ API Key is MISSING!');
+    }
+
+    // ✅ Check if endpoint exists
     const config = TOOL_CONFIGS[path];
     if (!config) {
       return new Response(JSON.stringify({
@@ -89,15 +108,18 @@ if (env.DEEPSEEK_API_KEY) {
         headers: getCorsHeaders(request)
       });
     }
+
+    // ✅ Parse request body
     let data;
     try {
       data = await request.json();
-    } catch {
+    } catch (e) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
         status: 400,
         headers: getCorsHeaders(request)
       });
     }
+
     const text = data.text || data.prompt || '';
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return new Response(JSON.stringify({ error: 'Text input is required' }), {
@@ -105,6 +127,8 @@ if (env.DEEPSEEK_API_KEY) {
         headers: getCorsHeaders(request)
       });
     }
+
+    // ✅ Get API key
     const apiKey = env.DEEPSEEK_API_KEY;
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not set');
@@ -113,6 +137,7 @@ if (env.DEEPSEEK_API_KEY) {
         headers: getCorsHeaders(request)
       });
     }
+
     try {
       const response = await fetch(DEEPSEEK_API_URL, {
         method: 'POST',
@@ -136,7 +161,7 @@ if (env.DEEPSEEK_API_KEY) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('DeepSeek error:', response.status, errorText);
+        console.error('DeepSeek API error:', response.status, errorText);
         return new Response(JSON.stringify({ error: 'AI service unavailable' }), {
           status: 503,
           headers: getCorsHeaders(request)
