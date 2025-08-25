@@ -1,6 +1,6 @@
 {
   "name": "nexusrank-ai-pro",
-  "main": "worker.js",
+  "main": "backend/worker.js", // Update this line to point to the correct path
   "compatibility_date": "2025-08-25",
   "workers_dev": true,
   "build": {
