@@ -71,6 +71,13 @@ export default {
     }
     const url = new URL(request.url);
     const path = url.pathname;
+    console.log('🔍 Incoming request to:', new URL(request.url).pathname);
+console.log('🔑 API Key exists:', !!env.DEEPSEEK_API_KEY);
+if (env.DEEPSEEK_API_KEY) {
+  console.log('🔑 First 4 chars:', env.DEEPSEEK_API_KEY.substring(0, 4));
+} else {
+  console.log('❌ API Key is MISSING!');
+}
 
     const config = TOOL_CONFIGS[path];
     if (!config) {
