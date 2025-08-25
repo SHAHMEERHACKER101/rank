@@ -1,6 +1,6 @@
 {
   "name": "nexusrank-ai-pro",
-  "main": "backend/worker.js", // Update this line to point to the correct path
+  "main": "worker.js",
   "compatibility_date": "2025-08-25",
   "workers_dev": true,
   "build": {
@@ -8,11 +8,5 @@
   },
   "vars": {
     "ENVIRONMENT": "production"
-  },
-  "secrets": [
-    "DEEPSEEK_API_KEY"
-  ],
-  "observability": {
-    "enabled": true
   }
 }
