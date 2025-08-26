@@ -9,29 +9,6 @@
   "vars": {
     "ENVIRONMENT": "production"
   },
-  "env": {
-    "production": {
-      "name": "nexusrank-ai-pro",
-      "vars": {
-        "ENVIRONMENT": "production"
-      }
-    },
-    "staging": {
-      "name": "nexusrank-ai-pro-staging",
-      "vars": {
-        "ENVIRONMENT": "staging"
-      }
-    }
-  },
-  "secrets": [
-    "DEEPSEEK_API_KEY"
-  ],
-  "limits": {
-    "cpu_ms": 50000
-  },
-  "placement": {
-    "mode": "smart"
-  },
   "observability": {
     "enabled": true
   }
