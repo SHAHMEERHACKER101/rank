@@ -1,10 +1,11 @@
 /**
  * NexusRank Pro - Service Worker
  * Provides offline functionality and caching for the AI SEO toolkit
+ * Fixed redirect handling for proper navigation
  */
 
-const CACHE_NAME = 'nexusrank-pro-v1.0.0';
-const API_CACHE_NAME = 'nexusrank-api-v1.0.0';
+const CACHE_NAME = 'nexusrank-pro-v2.0.0';
+const API_CACHE_NAME = 'nexusrank-api-v2.0.0';
 
 // Files to cache for offline functionality
 const STATIC_CACHE_FILES = [
@@ -30,7 +31,7 @@ const CACHEABLE_API_PATTERNS = [
 
 // Install event - cache static resources
 self.addEventListener('install', event => {
-  console.log('[SW] Installing Service Worker');
+  console.log('[SW] Installing Service Worker v2.0.0');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -50,7 +51,7 @@ self.addEventListener('install', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating Service Worker');
+  console.log('[SW] Activating Service Worker v2.0.0');
   
   event.waitUntil(
     caches.keys()
@@ -71,7 +72,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - handle network requests
+// Fetch event - handle network requests with proper redirect handling
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
@@ -131,7 +132,7 @@ function isAPIRequest(url) {
  */
 function isNavigationRequest(request) {
   return request.mode === 'navigate' || 
-         (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
+         (request.method === 'GET' && request.headers.get('accept') && request.headers.get('accept').includes('text/html'));
 }
 
 /**
@@ -145,8 +146,12 @@ async function handleStaticResource(request) {
       return cachedResponse;
     }
     
-    // Fetch from network and cache
-    const networkResponse = await fetch(request, { redirect: 'follow' });
+    // Fetch from network with redirect: 'follow'
+    const networkResponse = await fetch(request, { 
+      redirect: 'follow',
+      mode: 'cors'
+    });
+    
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
@@ -188,7 +193,10 @@ async function handleAPIRequest(request) {
   // AI endpoints should not be cached (always fresh data)
   if (url.pathname.startsWith('/ai/')) {
     try {
-      return await fetch(request, { redirect: 'follow' });
+      return await fetch(request, { 
+        redirect: 'follow',
+        mode: 'cors'
+      });
     } catch (error) {
       console.error('[SW] AI API request failed:', error);
       return new Response(JSON.stringify({
@@ -205,7 +213,10 @@ async function handleAPIRequest(request) {
   // Other API endpoints (like health checks) can be cached briefly
   if (CACHEABLE_API_PATTERNS.some(pattern => pattern.test(url.pathname))) {
     try {
-      const networkResponse = await fetch(request, { redirect: 'follow' });
+      const networkResponse = await fetch(request, { 
+        redirect: 'follow',
+        mode: 'cors'
+      });
       
       if (networkResponse.ok) {
         const cache = await caches.open(API_CACHE_NAME);
@@ -242,8 +253,11 @@ async function handleAPIRequest(request) {
     }
   }
   
-  // For all other API requests, just try network
-  return fetch(request, { redirect: 'follow' });
+  // For all other API requests, just try network with redirect handling
+  return fetch(request, { 
+    redirect: 'follow',
+    mode: 'cors'
+  });
 }
 
 /**
@@ -252,7 +266,10 @@ async function handleAPIRequest(request) {
 async function handleNavigationRequest(request) {
   try {
     // Try network first with redirect: 'follow'
-    const networkResponse = await fetch(request, { redirect: 'follow' });
+    const networkResponse = await fetch(request, { 
+      redirect: 'follow',
+      mode: 'navigate'
+    });
     
     if (networkResponse.ok) {
       // Cache successful responses
@@ -353,7 +370,10 @@ async function handleNavigationRequest(request) {
  */
 async function handleOtherRequests(request) {
   try {
-    return await fetch(request, { redirect: 'follow' });
+    return await fetch(request, { 
+      redirect: 'follow',
+      mode: 'cors'
+    });
   } catch (error) {
     console.error('[SW] Other request failed:', error);
     throw error;
@@ -450,4 +470,4 @@ async function clearAllCaches() {
   );
 }
 
-console.log('[SW] Service Worker script loaded');
+console.log('[SW] Service Worker v2.0.0 script loaded - Fixed redirect handling');

@@ -1,64 +1,50 @@
-# NexusRank Pro - Deployment Fix Guide
+# NexusRank Pro - Complete Deployment Guide
 
-## Issues Fixed:
+This guide will walk you through deploying NexusRank Pro v2.0 with Google Gemini AI integration from scratch.
 
-1. **Service Worker redirect errors** - Fixed by adding `redirect: 'follow'` to all fetch requests
-2. **Worker API key access** - Enhanced environment variable detection
-3. **CORS configuration** - Updated for proper domain handling
-4. **Compatibility date** - Updated to working date for free plan
+## 📋 Prerequisites
 
-## Immediate Steps to Fix:
+Before you begin, make sure you have:
 
-### Step 1: Update Your Repository
-1. Replace all files in your GitHub repository with the updated versions
-2. Commit and push the changes:
+1. **GitHub Account** - For code repository
+2. **Cloudflare Account** - For Pages and Workers hosting
+3. **Google Account** - For Gemini AI API access
+4. **Node.js & npm** - For Wrangler CLI (optional but recommended)
+5. **Git** - For version control
+
+## 🚀 Step-by-Step Deployment
+
+### Step 1: Get Your Google Gemini API Key
+
+1. **Visit Google AI Studio:**
+   - Go to [https://aistudio.google.com/](https://aistudio.google.com/)
+   - Sign in with your Google account
+
+2. **Create API Key:**
+   - Click "Get API Key" in the left sidebar
+   - Click "Create API Key"
+   - Choose "Create API Key in new project" (recommended)
+   - Copy the generated API key
+   - **Important:** Save this key securely - you won't be able to see it again
+
+3. **Verify API Access:**
+   - Test your key with a simple curl request:
    ```bash
-   git add .
-   git commit -m "Fix: Service Worker redirects and Worker API access"
-   git push origin main
+   curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+   -H "Content-Type: application/json" \
+   -d '{"contents":[{"parts":[{"text":"Hello"}]}]}'
    ```
 
-### Step 2: Redeploy Worker
-Your worker will automatically redeploy from GitHub. If it doesn't:
-1. Go to Cloudflare Workers dashboard
-2. Find "nexusrank-ai-pro" worker
-3. Go to Settings → Triggers → Click "Deploy"
+### Step 2: Prepare Your Code Repository
 
-### Step 3: Verify API Key
-1. Go to Cloudflare Workers dashboard
-2. Select "nexusrank-ai-pro" worker
-3. Settings → Variables and Secrets
-4. Ensure "DEEPSEEK_API_KEY" is listed as a secret
-5. If not, add it manually
+1. **Create GitHub Repository:**
+   ```bash
+   # Create a new repository on GitHub named "nexusrank-pro"
+   git clone https://github.com/yourusername/nexusrank-pro.git
+   cd nexusrank-pro
+   ```
 
-### Step 4: Test Everything
-After deployment, test:
-```bash
-# Health check (should show hasApiKey: true)
-curl https://nexusrank-ai-pro.shahshameer383.workers.dev/health
-
-# AI test
-curl -X POST https://nexusrank-ai-pro.shahshameer383.workers.dev/ai/humanize \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Test message"}'
-```
-
-## What's Fixed:
-
-### Service Worker (sw.js)
-- Added `redirect: 'follow'` to all fetch requests
-- Prevents "redirected response was used for a request whose redirect mode is not follow" errors
-- Fixes page navigation issues
-
-### Worker (backend/worker.js)
-- Enhanced API key detection from multiple sources
-- Better debug logging to identify configuration issues
-- Updated CORS for your specific domains
-- Health endpoint now shows API key status
-
-### Configuration (backend/wrangler.jsonc)
-- Removed paid-plan features causing deployment failures
-- Updated compatibility date to working version
-- Simplified for free plan compatibility
-
-All pages should now load correctly and AI tools should work properly!
+2. **Add Project Files:**
+   - Copy all the project files to your repository
+   - Ensure the directory structure matches:
+   
