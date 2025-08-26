@@ -5,8 +5,8 @@
 
 class NexusRankApp {
   constructor() {
-    // ✅ Fixed URL (no trailing spaces!)
-    this.apiBaseUrl = 'https://nexusrank-ai-pro.shahshameer383.workers.dev/';
+    // ✅ Fixed URL (NO TRAILING SPACES OR SLASHES!)
+    this.apiBaseUrl = 'https://nexusrank-ai-pro.shahshameer383.workers.dev';
 
     this.currentTool = null;
     this.isProUser = false;
@@ -41,8 +41,12 @@ class NexusRankApp {
     } catch (error) {
       console.error('Error loading usage data:', error);
       this.usageData = {
-        'seo-write': 0, 'humanize': 0, 'detect': 0,
-        'paraphrase': 0, 'grammar': 0, 'improve': 0
+        'seo-write': 0,
+        'humanize': 0,
+        'detect': 0,
+        'paraphrase': 0,
+        'grammar': 0,
+        'improve': 0
       };
     }
   }
@@ -351,13 +355,12 @@ class NexusRankApp {
 
   async callAI(inputText) {
     const toolConfig = this.getToolConfig(this.currentTool);
-    const fullPrompt = `${toolConfig.prompt}\n\n${inputText}`;
 
     try {
       const response = await fetch(`${this.apiBaseUrl}${toolConfig.endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputText }) // ✅ Only send `text`
+        body: JSON.stringify({ text: inputText })
       });
 
       if (!response.ok) {
@@ -451,11 +454,20 @@ class NexusRankApp {
     successDiv.className = 'success-notification';
     successDiv.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
     Object.assign(successDiv.style, {
-      position: 'fixed', top: '20px', right: '20px',
-      background: '#00cc00', color: 'white', padding: '1rem 1.5rem',
-      borderRadius: '8px', display: 'flex', alignItems: 'center',
-      gap: '0.5rem', zIndex: '4000', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-      transform: 'translateX(100%)', transition: 'transform 0.3s ease'
+      position: 'fixed',
+      top: '20px',
+      right: '20px',
+      background: '#00cc00',
+      color: 'white',
+      padding: '1rem 1.5rem',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      zIndex: '4000',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+      transform: 'translateX(100%)',
+      transition: 'transform 0.3s ease'
     });
     document.body.appendChild(successDiv);
 
