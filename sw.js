@@ -146,7 +146,7 @@ async function handleStaticResource(request) {
     }
     
     // Fetch from network and cache
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetch(request, { redirect: 'follow' });
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
@@ -188,7 +188,7 @@ async function handleAPIRequest(request) {
   // AI endpoints should not be cached (always fresh data)
   if (url.pathname.startsWith('/ai/')) {
     try {
-      return await fetch(request);
+      return await fetch(request, { redirect: 'follow' });
     } catch (error) {
       console.error('[SW] AI API request failed:', error);
       return new Response(JSON.stringify({
@@ -205,7 +205,7 @@ async function handleAPIRequest(request) {
   // Other API endpoints (like health checks) can be cached briefly
   if (CACHEABLE_API_PATTERNS.some(pattern => pattern.test(url.pathname))) {
     try {
-      const networkResponse = await fetch(request);
+      const networkResponse = await fetch(request, { redirect: 'follow' });
       
       if (networkResponse.ok) {
         const cache = await caches.open(API_CACHE_NAME);
@@ -243,7 +243,7 @@ async function handleAPIRequest(request) {
   }
   
   // For all other API requests, just try network
-  return fetch(request);
+  return fetch(request, { redirect: 'follow' });
 }
 
 /**
@@ -251,8 +251,8 @@ async function handleAPIRequest(request) {
  */
 async function handleNavigationRequest(request) {
   try {
-    // Try network first
-    const networkResponse = await fetch(request);
+    // Try network first with redirect: 'follow'
+    const networkResponse = await fetch(request, { redirect: 'follow' });
     
     if (networkResponse.ok) {
       // Cache successful responses
@@ -353,7 +353,7 @@ async function handleNavigationRequest(request) {
  */
 async function handleOtherRequests(request) {
   try {
-    return await fetch(request);
+    return await fetch(request, { redirect: 'follow' });
   } catch (error) {
     console.error('[SW] Other request failed:', error);
     throw error;

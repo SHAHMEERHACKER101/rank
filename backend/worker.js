@@ -90,7 +90,10 @@ async function handleRequest(request, env) {
     return new Response(JSON.stringify({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      service: 'NexusRank Pro AI Worker'
+      service: 'NexusRank Pro AI Worker',
+      hasApiKey: !!(env?.DEEPSEEK_API_KEY || globalThis.DEEPSEEK_API_KEY),
+      envType: typeof env,
+      envKeys: env ? Object.keys(env) : []
     }), {
       headers: { 
         'Content-Type': 'application/json',
@@ -134,15 +137,19 @@ function handleCors(corsHeaders) {
 async function handleAIRequest(request, endpoint, env, corsHeaders) {
   try {
     // Get DeepSeek API key from environment (supports both module and service worker syntax)
-    const apiKey = env?.DEEPSEEK_API_KEY || globalThis.DEEPSEEK_API_KEY;
-    console.log('Environment check:', { 
+    const apiKey = env?.DEEPSEEK_API_KEY || globalThis.DEEPSEEK_API_KEY || process?.env?.DEEPSEEK_API_KEY;
+    console.log('Environment debug:', { 
       hasEnv: !!env, 
-      hasApiKey: !!apiKey, 
-      envKeys: Object.keys(env || {}),
-      globalKeys: Object.keys(globalThis).filter(k => k.includes('DEEPSEEK'))
+      hasApiKey: !!apiKey,
+      envType: typeof env,
+      envKeys: env ? Object.keys(env) : [],
+      globalHasDeepseek: 'DEEPSEEK_API_KEY' in globalThis,
+      processEnvExists: !!process?.env
     });
+    
     if (!apiKey) {
-      return createErrorResponse('AI service configuration error. Please contact support.', 500, corsHeaders);
+      console.error('No API key found in any environment source');
+      return createErrorResponse('AI service configuration error. API key not found.', 500, corsHeaders);
     }
 
     // Parse request body
