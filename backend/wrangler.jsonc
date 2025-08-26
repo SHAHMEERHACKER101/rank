@@ -2,8 +2,7 @@
   "name": "nexusrank-ai-pro",
   "main": "worker.js",
   "compatibility_date": "2025-08-25",
-  "workers_dev": true,
-  "build": {
-    "command": ""
+  "vars": {
+    "ENVIRONMENT": "production"
   }
 }
