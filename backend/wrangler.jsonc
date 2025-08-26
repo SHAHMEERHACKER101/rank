@@ -5,11 +5,5 @@
   "workers_dev": true,
   "build": {
     "command": ""
-  },
-  "vars": {
-    "ENVIRONMENT": "production"
-  },
-  "observability": {
-    "enabled": true
   }
 }
